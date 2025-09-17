@@ -7,6 +7,18 @@ const CartPage = () => {
   const dispatch = useDispatch();
   const { items, totalQuantity, totalAmount } = useSelector(state => state.cart);
 
+  // Debug: Log cart items to check data structure
+  console.log('Cart Items:', items);
+  items.forEach(item => {
+    console.log(`Item ${item.id}:`, {
+      name: item.name,
+      image: item.image,
+      price: item.price,
+      quantity: item.quantity,
+      totalPrice: item.totalPrice
+    });
+  });
+
   const handleRemoveItem = (id) => {
     dispatch(removeFromCart(id));
   };
@@ -76,8 +88,8 @@ const CartPage = () => {
                   <div className="flex-1">
                     <h3 className="font-semibold text-blue-900 mb-2">
                       {item.name}</h3>
-                    {/* <p className="text-lg font-bold text-blue-900">
-                      {formatPrice(item.price)}/item</p> */}
+                    <p className="text-lg font-bold text-blue-900">
+                      {formatPrice(item.price)}/item</p>
                   </div>
 
                   {/* Quantity Controls */}
@@ -114,7 +126,7 @@ const CartPage = () => {
                   <span className="text-gray-600">Subtotal:</span>
                   <span className="font-bold text-blue-900 text-lg">
                     {/* {formatPrice(item.totalPrice)} */}
-                    {formatPrice(totalAmount)}
+                    {formatPrice(item.totalPrice)}
                     </span>
                 </div>
               </div>

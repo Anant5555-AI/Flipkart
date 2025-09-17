@@ -50,18 +50,32 @@ const Navbar = () => {
   const getCategoryIcon = (category) => {
     const iconMap = {
       'All': '🏪',
+      // Categories from MongoDB database
+      'beauty': '💄',
+      'fragrances': '🌸',
+      'furniture': '🪑',
+      'groceries': '🛒',
+      // Formatted versions
+      'Beauty': '💄',
+      'Fragrances': '🌸',
+      'Furniture': '🪑',
+      'Groceries': '🛒',
+      // Additional common categories for future compatibility
+      'electronics': '📱',
+      'jewelery': '💎',
+      "men's clothing": '👔',
+      "women's clothing": '👗',
+      'Electronics': '📱',
+      'Jewelry': '💎',
+      "Men's Fashion": '👔',
+      "Women's Fashion": '👗',
       'Smartphones': '📱',
       'Laptops': '💻',
-      'Fragrances': '🌸',
-      'Skincare': '🧴',
-      'Groceries': '🛒',
-      'Home Decoration': '🏠',
-      'Furniture': '🪑',
-      'Tops': '👕',
-      "Women's Dresses": '👗',
-      "Women's Shoes": '👠',
-      "Men's Shirts": '👔',
-      
+      'Cameras': '📷',
+      'Headphones': '🎧',
+      'Watches': '⌚',
+      'Shoes': '👟',
+      'Clothing': '👕',
     };
     return iconMap[category] || '📦';
   };

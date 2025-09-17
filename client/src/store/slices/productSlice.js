@@ -1,44 +1,48 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import API from '../../api/axios';
 
-
-const API_BASE_URL = 'https://dummyjson.com';
+const initialState = {
+  products: [],
+  filteredProducts: [],
+  selectedProduct: null,
+  categories: [],
+  selectedCategory: 'All',
+  searchTerm: '',
+  loading: false,
+  error: null,
+  productsLoading: false,
+  categoriesLoading: false,
+  productLoading: false,
+};
 
 // Async thunk to fetch all products
 export const fetchProducts = createAsyncThunk(
   'products/fetchProducts',
-  async ( _ , { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/products?limit=100`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch products');
-      }
-      const data = await response.json();
+      const response = await API.get('/products');
       
       // Transform the data to match our app's structure
-      return data.products.map(product => ({
-        id: product.id,
+      return response.data.data.map(product => ({
+        id: product._id,
         title: product.title,
-        price: Math.round(product.price * 83), 
-        // Convert USD to INR (approximate)
-        originalPrice: Math.round(product.price * 83 * 1.2),
-         // Add original price for discount effect
-        image: product.thumbnail,
-        images: product.images || [product.thumbnail],
+        price: product.price,
+        originalPrice: product.originalPrice,
+        image: product.image || product.images[0],
+        images: product.images || [product.image],
         category: product.category,
         description: product.description,
         rating: {
-          rate: product.rating || 4.0,
-          count: Math.floor(Math.random() * 500) + 50 
-          // Random review count
+          rate: product.rating.rate || 4.0,
+          count: product.rating.count || Math.floor(Math.random() * 500) + 50
         },
-        discount: product.discountPercentage || 
-        Math.floor(Math.random() * 30) + 10,
-        brand: product.brand || 'Generic',
+        discount: product.discount || Math.floor(Math.random() * 30) + 10,
+        brand: product.brand,
         stock: product.stock || Math.floor(Math.random() * 100) + 10,
-        inStock: true
+        inStock: product.inStock !== false
       }));
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
   }
 );
@@ -48,33 +52,30 @@ export const fetchProductById = createAsyncThunk(
   'products/fetchProductById',
   async (productId, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/products/${productId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch product');
-      }
-      const product = await response.json();
+      const response = await API.get(`/products/${productId}`);
+      const product = response.data.data;
       
       // Transform the data to match our app's structure
       return {
-        id: product.id,
+        id: product._id,
         title: product.title,
-        price: Math.round(product.price * 83), // Convert USD to INR
-        originalPrice: Math.round(product.price * 83 * 1.2),
-        image: product.thumbnail,
-        images: product.images || [product.thumbnail],
+        price: product.price,
+        originalPrice: product.originalPrice,
+        image: product.image || `https://picsum.photos/seed/${product._id}/300/300.jpg`,
+        images: product.images || [product.image || `https://picsum.photos/seed/${product._id}/300/300.jpg`],
         category: product.category,
         description: product.description,
         rating: {
-          rate: product.rating || 4.0,
-          count: Math.floor(Math.random() * 500) + 50
+          rate: product.rating.rate || 4.0,
+          count: product.rating.count || Math.floor(Math.random() * 500) + 50
         },
-        discount: product.discountPercentage || Math.floor(Math.random() * 30) + 10,
-        brand: product.brand || 'Generic',
+        discount: product.discount || Math.floor(Math.random() * 30) + 10,
+        brand: product.brand,
         stock: product.stock || Math.floor(Math.random() * 100) + 10,
-        inStock: true
+        inStock: product.inStock !== false
       };
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
   }
 );
@@ -84,18 +85,10 @@ export const fetchCategories = createAsyncThunk(
   'products/fetchCategories',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/products/categories`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch categories');
-      }
-      const data = await response.json();
-      
-      // DummyJSON returns objects with {slug, name, url}
-      // Extractg  the names and add 'All' at the beginning
-      const categoryNames = data.map(category => category.name);
-      return ['All', ...categoryNames];
+      const response = await API.get('/products/categories');
+      return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
   }
 );
@@ -132,20 +125,6 @@ const getCategoryIcon = (category) => {
   return iconMap[category] || '🛍️';
 };
 
-const initialState = {
-  products: [],
-  filteredProducts: [],
-  selectedProduct: null,
-  categories: [],
-  selectedCategory: 'All',
-  searchTerm: '',
-  loading: false,
-  error: null,
-  productsLoading: false,
-  categoriesLoading: false,
-  productLoading: false,
-};
-
 const productSlice = createSlice({
   name: 'products',
   initialState,
@@ -154,7 +133,8 @@ const productSlice = createSlice({
       state.selectedCategory = action.payload;
       state.filteredProducts = state.products.filter(product => {
         const matchesCategory = action.payload === 'All' || 
-          product.category.toLowerCase() === action.payload.toLowerCase();
+          product.category.toLowerCase() === action.payload.toLowerCase() ||
+          formatCategoryName(product.category).toLowerCase() === action.payload.toLowerCase();
         const matchesSearch = product.title.toLowerCase()
         .includes(state.searchTerm.toLowerCase());
         return matchesCategory && matchesSearch;

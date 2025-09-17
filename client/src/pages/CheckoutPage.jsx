@@ -173,7 +173,7 @@ const CheckoutPage = () => {
                     name="state"
                     value={deliveryAddress.state}
                     onChange={handleAddressChange}
-                    className="mt-1 block w-full border border-blue-700 rounded-md p-2"
+                    className="mt-1 block w-full border text-blue-700 border-blue-700 rounded-md p-2"
                     required
                   />
                 </div>
@@ -259,27 +259,29 @@ const CheckoutPage = () => {
             <div className="bg-white p-6 rounded-lg shadow sticky top-4">
               <h2 className="text-lg font-medium mb-4">Price Details ({totalItems} {totalItems === 1 ? 'Item' : 'Items'})</h2>
 
-              <div className="space-y-2 mb-4">
+              <div className="space-y-2  mb-4">
                 {cartItems.map((item) => (
-                  <div key={item.id} className="flex justify-between items-center py-2 border-b">
-                    <div className="flex items-center">
+                  <div key={item.id} className="flex justify-between items-start py-3 border-b">
+                    <div className="flex items-center flex-1">
                       <img
                         src={item.image}
                         alt={item.title}
                         className="h-16 w-16 object-contain"
                       />
-                      <div className="ml-2">
+                      <div className="ml-3">
                         <h3 className="text-sm font-medium text-gray-900 line-clamp-1">{item.title}</h3>
                         <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                         <p className="text-sm font-medium text-gray-900">₹{item.price * item.quantity}</p>
                       </div>
                     </div>
-                    <button
-                      onClick={() => removeItem(item.id)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      Remove
-                    </button>
+                    <div className="ml-6 flex-shrink-0">
+                      <button
+                        onClick={() => removeItem(item.id)}
+                        className="text-red-600 hover:text-red-800 px-1.5 py-0.5 rounded hover:bg-red-50 transition-colors text-xs"
+                      >
+                        Remove
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

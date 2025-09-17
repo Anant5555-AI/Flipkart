@@ -16,15 +16,6 @@ const ProductCard = ({ product }) => {
     setQuantity(cartItem?.quantity || 0);
   }, [cartItem]);
 
-  // const handleAddToCart = (e) => {
-  //   e.preventDefault();
-  //   dispatch(addToCart({
-  //     id: product.id,
-  //     name: product.title,
-  //     price: product.price,
-  //     image: product.image,
-  //   }));
-  // };
   const handleAddToCart = (e) => {
     e.preventDefault();
     if (quantity === 0) {
@@ -32,7 +23,7 @@ const ProductCard = ({ product }) => {
         id: product.id,
         name: product.title,
         price: product.price,
-        image: product.image,
+        image: product.image ,
         quantity: 1,
       }));
       setQuantity(1);
@@ -100,7 +91,7 @@ const ProductCard = ({ product }) => {
       <Link to={`/product/${product.id}`} className="block">
         <div className="relative">
           <img
-            src={product.image}
+            src={product.images || `https://picsum.photos/seed/${product.id}/300/300.jpg`}
             alt={product.title}
             className="w-full h-48 object-cover"
           />

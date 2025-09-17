@@ -98,7 +98,10 @@ const cartItem = cartItems.find(item => item.id === selectedProduct?.id);
   };
 
   const formatPrice = (price) => {
-    return `₹${price.toLocaleString('en-IN')}`;
+    if (!price || isNaN(price)) {
+      return '₹0';
+    }
+    return `₹${Number(price).toLocaleString('en-IN')}`;
   };
 
   const StarRating = ({ rating }) => {
@@ -187,7 +190,7 @@ const cartItem = cartItems.find(item => item.id === selectedProduct?.id);
             {/* Product Image */}
             <div className="relative">
               <img
-                src={selectedProduct.image}
+                src={selectedProduct.images}
                 alt={selectedProduct.title}
                 className="w-full h-96 object-cover rounded-lg"
               />
@@ -203,7 +206,7 @@ const cartItem = cartItems.find(item => item.id === selectedProduct?.id);
                     : 'bg-white text-gray-400 hover:text-red-500'
                 }`}
               >
-                ❤️
+                {isInWishlist ? '❤️' : '♡'}
               </button>
             </div>
 
