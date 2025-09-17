@@ -30,7 +30,10 @@ const dispatch = useDispatch();
   };
 
   const formatPrice = (price) => {
-    return `₹${price.toLocaleString('en-IN')}`;
+    if (price === undefined || price === null || isNaN(price)) {
+      return '₹0';
+    }
+    return `₹${Number(price).toLocaleString('en-IN')}`;
   };
 
   const StarRating = ({ rating }) => {
