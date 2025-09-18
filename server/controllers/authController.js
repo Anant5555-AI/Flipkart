@@ -41,7 +41,7 @@ exports.register = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role
-      }
+      },token//added token here so that session bearer exp na return kre
     });
   } catch (error) {
     next(error);
@@ -86,7 +86,7 @@ exports.login = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role
-      }
+      },token//added so that session bearer exp na return kre
     });
   } catch (error) {
     next(error);
