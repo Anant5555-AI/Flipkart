@@ -91,7 +91,8 @@ const ProductCard = ({ product }) => {
       <Link to={`/product/${product.id}`} className="block">
         <div className="relative">
           <img
-            src={product.images || `https://picsum.photos/seed/${product.id}/300/300.jpg`}
+            {/* src={product.images || `https://picsum.photos/seed/${product.id}/300/300.jpg`} */}
+           src={Array.isArray(product.images) ? product.images[0] : product.images}
             alt={product.title}
             className="w-full h-48 object-cover"
           />
