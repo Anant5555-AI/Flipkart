@@ -190,7 +190,8 @@ const cartItem = cartItems.find(item => item.id === selectedProduct?.id);
             {/* Product Image */}
             <div className="relative">
               <img
-                src={selectedProduct.images}
+                {/* src={selectedProduct.images} */}
+               src= {Array.isArray(selectedProduct.images) ? selectedProduct.images[0] :selectedProduct.images}
                 alt={selectedProduct.title}
                 className="w-full h-96 object-cover rounded-lg"
               />
