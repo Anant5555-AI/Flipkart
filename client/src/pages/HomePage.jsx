@@ -114,7 +114,7 @@ const HomePage = () => {
           <h3 className="text-xl font-semibold text-gray-800">
             {selectedCategory === "All" ? "All Products" : selectedCategory}
             <span className="text-gray-500 font-normal ml-2">
-              ({filteredProducts.length} items)
+              ({startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredProducts.length)} of {filteredProducts.length} items)
             </span>
           </h3>
 
