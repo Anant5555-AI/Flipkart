@@ -86,14 +86,17 @@ const ProductCard = ({ product }) => {
     );
   };
 
+  // Debug: Log the product rating structure
+  console.log('Product rating data:', product.rating);
+
   return (
-    <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+    <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
       <Link to={`/product/${product.id}`} className="block">
         <div className="relative">
           <img
-           src={Array.isArray(product.images) ? product.images[0] : product.images}
+            src={Array.isArray(product.images) ? product.images[0] : product.thumbnail}
             alt={product.title}
-            className="w-full h-48 object-cover"
+            className="w-full h-32 object-cover"
           />
           <div className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold">
             {product.discount}% off
@@ -111,17 +114,23 @@ const ProductCard = ({ product }) => {
           </button>
         </div>
         
-        <div className="p-4">
-          <h4 className="font-semibold text-gray-800 mb-2 line-clamp-2">{product.title}</h4>
+        <div className="p-3">
+          <h4 className="font-medium text-gray-800 mb-1 text-sm line-clamp-2">{product.title}</h4>
           
-          <div className="flex items-center mb-2">
-            <StarRating rating={product.rating.rate} />
-            <span className="ml-2 text-sm text-gray-500">({product.rating.count})</span>
+          <div className="flex items-center mb-1">
+            {product.rating && (
+              <>
+                <StarRating rating={typeof product.rating === 'number' ? product.rating : product.rating.rate} />
+                <span className="ml-1 text-xs text-gray-500">
+                  ({typeof product.rating === 'number' ? '100' : (product.rating.count || 0)})
+                </span>
+              </>
+            )}
           </div>
           
-          <div className="flex items-center space-x-2 mb-3">
-            <span className="text-xl font-bold text-gray-900">{formatPrice(product.price)}</span>
-            <span className="text-sm text-gray-500 line-through">{formatPrice(product.originalPrice)}</span>
+          <div className="flex items-center space-x-1 mb-2">
+            <span className="text-sm font-bold text-gray-900">{formatPrice(product.price)}</span>
+            <span className="text-xs text-gray-500 line-through">{formatPrice(product.originalPrice)}</span>
           </div>
           
           {/* <button
