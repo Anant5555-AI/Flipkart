@@ -120,8 +120,11 @@ const Navbar = () => {
             {/* User Login + Wishlist + Cart - Desktop */}
             <div className="flex items-center space-x-6">
               {isAuthenticated ? (
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-4">
                   <span>Hi, {user?.name || "user"}</span>
+                  <Link to="/dashboard" className="text-sm font-medium hover:underline">
+                    Dashboard
+                  </Link>
                   <button onClick={handleLogout} className="hover:underline">
                     Logout
                   </button>
@@ -173,8 +176,11 @@ const Navbar = () => {
             <div className="flex items-center justify-between py-2 border-t border-blue-600">
               <div className="flex items-center space-x-4">
                 {isAuthenticated ? (
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-3">
                     <span className="text-sm">Hi, {user?.name || "user"}</span>
+                    <Link to="/dashboard" className="text-sm font-medium hover:underline">
+                      Dashboard
+                    </Link>
                     <button onClick={handleLogout} className="text-sm hover:underline">
                       Logout
                     </button>
