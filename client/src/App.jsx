@@ -1,22 +1,23 @@
-import React from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import HomePage from './pages/HomePage';
-import ProductPage from './pages/ProductPage';
-import CartPage from './pages/CartPage';
-import CheckoutPage from './pages/CheckoutPage';
-import LoginPage from './pages/LoginPage';
-import Wishlist from './pages/Wishlist';
-import ProductList from './pages/ProductList';
-import SignupPage from './pages/SignupPage';
-import OrderSuccess from './components/OrderSuccess';
 import './App.css';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect } from 'react';
 import { getCurrentUser } from './services/auth';
 import { loginSuccess, loginFailure } from './store/slices/authSlice';
+
+const HomePage = lazy(() => import('./pages/HomePage'));
+const ProductPage = lazy(() => import('./pages/ProductPage'));
+const CartPage = lazy(() => import('./pages/CartPage'));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const Wishlist = lazy(() => import('./pages/Wishlist'));
+const ProductList = lazy(() => import('./pages/ProductList'));
+const SignupPage = lazy(() => import('./pages/SignupPage'));
+const OrderSuccess = lazy(() => import('./components/OrderSuccess'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 
 function App() {
   const dispatch = useDispatch();
@@ -48,9 +49,16 @@ function App() {
     checkAuth();
   }, [dispatch]);
 
+  const renderFallback = (
+    <div className="flex min-h-screen items-center justify-center text-gray-600">
+      Loading...
+    </div>
+  );
+
   return (
     <Router>
       <div className="flex flex-col min-h-screen bg-gray-50 w-full overflow-x-hidden">
+        <Suspense fallback={renderFallback}>
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={
@@ -128,6 +136,14 @@ function App() {
                 <Footer />
               </>
             } />
+
+            <Route path="/dashboard" element={
+              <>
+                <Navbar />
+                <DashboardPage />
+                <Footer />
+              </>
+            } />
           </Route>
 
           {/* 404 Route */}
@@ -137,6 +153,7 @@ function App() {
             </div>
           } />
         </Routes>
+        </Suspense>
       </div>
     </Router>
   );
