@@ -31,12 +31,12 @@ const ProductPage = () => {
     (item) => item._id === selectedProduct?._id
   );
 
-  // Load product by MongoDB _id
+ 
   useEffect(() => {
     if (id) dispatch(fetchProductById(id));
   }, [id, dispatch]);
 
-  // Set quantity if product already in cart
+
   useEffect(() => {
     if (cartItem) {
       setQuantity(cartItem.quantity);
@@ -169,7 +169,7 @@ const ProductPage = () => {
     );
   }
 
-  // SAFE FALLBACKS
+  // SAFE FALLBACKS(need tha)
   const ratingRate = selectedProduct.rating?.rate || selectedProduct.rating || 0;
   const ratingCount = selectedProduct.rating?.count || selectedProduct.reviews?.length || 0;
   const discount = selectedProduct.discount || selectedProduct.discountPercentage || 0;
