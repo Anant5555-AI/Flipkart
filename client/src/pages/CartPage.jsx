@@ -7,8 +7,7 @@ const CartPage = () => {
   const dispatch = useDispatch();
   const { items, totalQuantity, totalAmount } = useSelector(state => state.cart);
 
-  // Debug: Log cart items to check data structure
-  console.log('Cart Items:', items);
+ 
   items.forEach(item => {
     console.log(`Item ${item.id}:`, {
       name: item.name,
@@ -92,7 +91,7 @@ const CartPage = () => {
                       {formatPrice(item.price)}/item</p>
                   </div>
 
-                  {/* Quantity Controls */}
+                  {/* Quantity Controls (taaki yaha bhi option ho)*/}
                   <div className="flex items-center space-x-3">
                     <button
       onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
