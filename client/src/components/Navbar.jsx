@@ -15,14 +15,14 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Fetch categories on mount
+  // lazyload applied hah but this is imp on first mount
   useEffect(() => {
     if (categories.length === 0) {
       dispatch(fetchCategories());
     }
   }, [dispatch, categories.length]);
 
-  // Close mobile menu when clicking outside
+  
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (isMobileMenuOpen && !event.target.closest('header')) {
@@ -56,7 +56,7 @@ const Navbar = () => {
     navigate('/');
   };
 
-  // Icon for each category
+ 
   const getCategoryIcon = (category) => {
     const iconMap = {
       'All': '🏪',
@@ -156,7 +156,7 @@ const Navbar = () => {
               </Link>
             </div>
 
-            {/* Search Bar - Mobile */}
+            {/* Search Bar - Mobile ..separate introduction diya for clear code presentation*/}
             <div className="pb-3">
               <div className="relative">
                 <input
