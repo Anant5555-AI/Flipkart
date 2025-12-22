@@ -120,29 +120,59 @@ const Navbar = () => {
             {/* User Login + Wishlist + Cart - Desktop */}
             <div className="flex items-center space-x-6">
               {isAuthenticated ? (
-                <div className="flex items-center space-x-4">
-                  <span>Hi, {user?.name || "user"}</span>
-                  <Link to="/dashboard" className="text-sm font-medium hover:underline">
-                    Dashboard
-                  </Link>
-                  <button onClick={handleLogout} className="hover:underline">
-                    Logout
+                <div className="relative group">
+                  <button
+                    className="flex items-center space-x-1 font-medium hover:text-blue-100 py-2 focus:outline-none"
+                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  >
+                    <span>{user?.name || "User"}</span>
+                    <svg className="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
                   </button>
+
+                  {/* Dropdown Menu */}
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 px-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right z-50">
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <p className="text-sm text-gray-500">Hello,</p>
+                      <p className="text-sm font-semibold text-gray-900 truncate">{user?.name}</p>
+                    </div>
+
+                    <Link to="/dashboard" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-sm">
+                      <span className="mr-2">📦</span> My Orders
+                    </Link>
+
+                    <Link to="/wishlist" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-sm">
+                      <span className="mr-2">❤️</span> Wishlist
+                    </Link>
+
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-sm mt-1"
+                    >
+                      <span className="mr-2">🚪</span> Logout
+                    </button>
+                  </div>
                 </div>
               ) : (
-                <Link to="/login" style={{ color: "white" }}>Login</Link>
+                <Link
+                  to="/login"
+                  className="bg-white text-[#2874f0] font-semibold px-8 py-1 rounded-sm border border-white hover:bg-transparent hover:text-white hover:border-white transition-colors"
+                >
+                  Login
+                </Link>
               )}
 
-              <Link to="/wishlist" className="flex items-center space-x-1 hover:bg-blue-700 px-3 py-2 rounded">
-                <span>❤️</span>
-                <span className="hidden lg:inline">Wishlist ({wishlistItems.length})</span>
-                <span className="lg:hidden">({wishlistItems.length})</span>
-              </Link>
-
-              <Link to="/cart" className="flex items-center space-x-1 hover:bg-blue-700 px-3 py-2 rounded">
-                <span>🛒</span>
-                <span className="hidden lg:inline">Cart ({totalQuantity})</span>
-                <span className="lg:hidden">({totalQuantity})</span>
+              <Link to="/cart" className="flex items-center font-medium hover:text-blue-100 relative">
+                <span className="relative">
+                  🛒
+                  {totalQuantity > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-[#2874f0]">
+                      {totalQuantity}
+                    </span>
+                  )}
+                </span>
+                <span className="ml-2 hidden lg:inline">Cart</span>
               </Link>
             </div>
           </div>
@@ -222,8 +252,8 @@ const Navbar = () => {
                 key={category}
                 onClick={() => handleCategoryClick(category)}
                 className={`flex flex-col items-center px-1 py-1 md:px-3 md:py-2 rounded transition-all duration-200 min-w-[50px] md:min-w-[80px] ${selectedCategory === category
-                    ? "bg-[#2874f0] text-white"
-                    : "text-gray-700 hover:bg-gray-100 hover:text-[#2874f0]"
+                  ? "bg-[#2874f0] text-white"
+                  : "text-gray-700 hover:bg-gray-100 hover:text-[#2874f0]"
                   }`}
               >
                 <span className="text-sm md:text-xl mb-1">
