@@ -15,14 +15,22 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+<<<<<<< HEAD
   // Fetch categories on mount
+=======
+  // lazyload applied hah but this is imp on first mount
+>>>>>>> 404c6c765fb32c098aed2abfaf122397cd75f1d5
   useEffect(() => {
     if (categories.length === 0) {
       dispatch(fetchCategories());
     }
   }, [dispatch, categories.length]);
 
+<<<<<<< HEAD
   // Close mobile menu when clicking outside
+=======
+  
+>>>>>>> 404c6c765fb32c098aed2abfaf122397cd75f1d5
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (isMobileMenuOpen && !event.target.closest('header')) {
@@ -56,7 +64,11 @@ const Navbar = () => {
     navigate('/');
   };
 
+<<<<<<< HEAD
   // Icon for each category
+=======
+ 
+>>>>>>> 404c6c765fb32c098aed2abfaf122397cd75f1d5
   const getCategoryIcon = (category) => {
     const iconMap = {
       'All': '🏪',
@@ -156,7 +168,11 @@ const Navbar = () => {
               </Link>
             </div>
 
+<<<<<<< HEAD
             {/* Search Bar - Mobile */}
+=======
+            {/* Search Bar - Mobile ..separate introduction diya for clear code presentation*/}
+>>>>>>> 404c6c765fb32c098aed2abfaf122397cd75f1d5
             <div className="pb-3">
               <div className="relative">
                 <input

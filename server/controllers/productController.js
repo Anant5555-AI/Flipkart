@@ -1,8 +1,6 @@
 const Product = require('../models/Product');
 
-// @desc    Get all products
-// @route   GET /api/products
-// @access  Public
+
 exports.getAllProducts = async (req, res, next) => {
   try {
     const {
@@ -105,9 +103,7 @@ exports.getAllProducts = async (req, res, next) => {
   }
 };
 
-// @desc    Get single product by ID
-// @route   GET /api/products/:id
-// @access  Public
+
 exports.getProductById = async (req, res, next) => {
   try {
     // Debug: Log the requested ID
@@ -190,9 +186,7 @@ exports.getProductById = async (req, res, next) => {
   }
 };
 
-// @desc    Get all categories
-// @route   GET /api/products/categories
-// @access  Public
+
 exports.getCategories = async (req, res, next) => {
   try {
     const categories = await Product.distinct("category");
@@ -208,9 +202,7 @@ exports.getCategories = async (req, res, next) => {
   }
 };
 
-// @desc    Create new product
-// @route   POST /api/products
-// @access  Private/Admin
+
 exports.createProduct = async (req, res, next) => {
   try {
     const product = await Product.create(req.body);
@@ -224,9 +216,7 @@ exports.createProduct = async (req, res, next) => {
   }
 };
 
-// @desc    Update product
-// @route   PUT /api/products/:id
-// @access  Private/Admin
+
 exports.updateProduct = async (req, res, next) => {
   try {
     const product = await Product.findByIdAndUpdate(
@@ -254,9 +244,7 @@ exports.updateProduct = async (req, res, next) => {
   }
 };
 
-// @desc    Delete product
-// @route   DELETE /api/products/:id
-// @access  Private/Admin
+
 exports.deleteProduct = async (req, res, next) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
@@ -277,9 +265,7 @@ exports.deleteProduct = async (req, res, next) => {
   }
 };
 
-// @desc    Get products by category
-// @route   GET /api/products/category/:category
-// @access  Public
+
 exports.getProductsByCategory = async (req, res, next) => {
   try {
     const { category } = req.params;

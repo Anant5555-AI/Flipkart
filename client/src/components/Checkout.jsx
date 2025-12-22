@@ -56,17 +56,17 @@ const Checkout = () => {
         },
         paymentMethod: formData.paymentMethod,
         itemsPrice: totalAmount,
-        taxPrice: 0, // You can calculate tax if needed
-        shippingPrice: 0, // Add shipping calculation if needed
+        taxPrice: 0, //  calculate tax if needed but abhi need ni..same neeche for shipping 
+        shippingPrice: 0, 
         totalPrice: totalAmount,
       };
 
       const data = await createOrder(orderData);
       
-      // Clear cart on successful order
+      
       dispatch(clearCart());
       
-      // Redirect to order success page
+    
       navigate(`/order/${data._id}`);
       
     } catch (err) {

@@ -12,10 +12,10 @@ const app = express();
 // whatever things will happen with user request it is here
 // Middleware
 app.use(cors({
-   origin: [
+  origin: [
     'http://localhost:5173',  // Local dev
-  //  'https://flipkart-client-hd9b.onrender.com',
-  //  'https://flipkart-client-1.onrender.com'
+    'https://flipkart-client-hd9b.onrender.com',
+    'https://flipkart-client-1.onrender.com'
     // my deployed frontend 
     // URL render pr
   ],

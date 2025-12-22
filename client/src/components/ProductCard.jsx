@@ -86,8 +86,12 @@ const ProductCard = ({ product }) => {
     );
   };
 
+<<<<<<< HEAD
   // Debug: Log the product rating structure
   console.log('Product rating data:', product.rating);
+=======
+ 
+>>>>>>> 404c6c765fb32c098aed2abfaf122397cd75f1d5
 
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
