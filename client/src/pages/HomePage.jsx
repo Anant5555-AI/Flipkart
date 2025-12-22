@@ -119,38 +119,43 @@ const HomePage = () => {
           </select>
         </div>
 
-        {/* Product Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-          <AnimatePresence mode="wait">
-            {productsLoading ? (
-              // 🔄 Show Skeletons while loading
-              [...Array(12)].map((_, index) => (
-                <motion.div
-                  key={`skeleton-${index}`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
+        <AnimatePresence mode="wait">
+          {productsLoading ? (
+            <motion.div
+              key="loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
+            >
+              {[...Array(12)].map((_, index) => (
+                <div key={`skeleton-${index}`}>
                   <ProductSkeleton />
-                </motion.div>
-              ))
-            ) : (
-              // 🛍️ Show Products
-              currentProducts.map((product) => (
+                </div>
+              ))}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="content"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
+            >
+              {currentProducts.map((product) => (
                 <motion.div
                   key={product.id}
                   layout
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.2 }}
                 >
                   <ProductCard product={product} />
                 </motion.div>
-              ))
-            )}
-          </AnimatePresence>
-        </div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* No Results */}
         {!productsLoading && currentProducts.length === 0 && (
