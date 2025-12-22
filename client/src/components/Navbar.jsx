@@ -15,22 +15,14 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-<<<<<<< HEAD
   // Fetch categories on mount
-=======
-  // lazyload applied hah but this is imp on first mount
->>>>>>> 404c6c765fb32c098aed2abfaf122397cd75f1d5
   useEffect(() => {
     if (categories.length === 0) {
       dispatch(fetchCategories());
     }
   }, [dispatch, categories.length]);
 
-<<<<<<< HEAD
   // Close mobile menu when clicking outside
-=======
-  
->>>>>>> 404c6c765fb32c098aed2abfaf122397cd75f1d5
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (isMobileMenuOpen && !event.target.closest('header')) {
@@ -64,11 +56,7 @@ const Navbar = () => {
     navigate('/');
   };
 
-<<<<<<< HEAD
   // Icon for each category
-=======
- 
->>>>>>> 404c6c765fb32c098aed2abfaf122397cd75f1d5
   const getCategoryIcon = (category) => {
     const iconMap = {
       'All': '🏪',
@@ -168,11 +156,7 @@ const Navbar = () => {
               </Link>
             </div>
 
-<<<<<<< HEAD
             {/* Search Bar - Mobile */}
-=======
-            {/* Search Bar - Mobile ..separate introduction diya for clear code presentation*/}
->>>>>>> 404c6c765fb32c098aed2abfaf122397cd75f1d5
             <div className="pb-3">
               <div className="relative">
                 <input
@@ -237,11 +221,10 @@ const Navbar = () => {
               <button
                 key={category}
                 onClick={() => handleCategoryClick(category)}
-                className={`flex flex-col items-center px-1 py-1 md:px-3 md:py-2 rounded transition-all duration-200 min-w-[50px] md:min-w-[80px] ${
-                  selectedCategory === category
+                className={`flex flex-col items-center px-1 py-1 md:px-3 md:py-2 rounded transition-all duration-200 min-w-[50px] md:min-w-[80px] ${selectedCategory === category
                     ? "bg-[#2874f0] text-white"
                     : "text-gray-700 hover:bg-gray-100 hover:text-[#2874f0]"
-                }`}
+                  }`}
               >
                 <span className="text-sm md:text-xl mb-1">
                   {getCategoryIcon(category)}
