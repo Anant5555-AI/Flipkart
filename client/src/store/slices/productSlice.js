@@ -129,6 +129,13 @@ const productSlice = createSlice({
     },
     clearError: (state) => {
       state.error = null;
+    },
+    updateStock: (state, action) => {
+      const { id, stock } = action.payload;
+      const product = state.products.find(p => p.id === id || p._id === id);
+      if (product) {
+        product.stock = stock;
+      }
     }
   },
 
@@ -189,7 +196,8 @@ export const {
   setPriceRange,
   setMinimumRating,
   clearFilters,
-  clearError
+  clearError,
+  updateStock
 } = productSlice.actions;
 
 export default productSlice.reducer;

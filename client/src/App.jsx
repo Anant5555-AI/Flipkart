@@ -8,6 +8,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getCurrentUser } from './services/auth';
 import { loginSuccess, loginFailure } from './store/slices/authSlice';
 
+import { updateStock } from './store/slices/productSlice';
+import { io } from 'socket.io-client';
+
 const HomePage = lazy(() => import('./pages/HomePage'));
 const ProductPage = lazy(() => import('./pages/ProductPage'));
 const CartPage = lazy(() => import('./pages/CartPage'));
@@ -23,6 +26,24 @@ const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 function App() {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector(state => state.auth);
+
+  useEffect(() => {
+    // Socket.io Listener for Real-time Stock Updates
+    const socket = io('http://localhost:5000');
+
+    socket.on('connect', () => {
+      console.log('Connected to socket server');
+    });
+
+    socket.on('product:update', (data) => {
+      console.log('Real-time stock update:', data);
+      dispatch(updateStock(data));
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [dispatch]);
 
   useEffect(() => {
     const checkAuth = async () => {

@@ -104,8 +104,8 @@ const ProductCard = ({ product }) => {
           <button
             onClick={handleWishlistToggle}
             className={`absolute top-2 right-2 p-2 rounded-full transition-colors ${isInWishlist
-                ? 'bg-red-500 text-white'
-                : 'bg-white text-gray-400 hover:text-gray-500'
+              ? 'bg-red-500 text-white'
+              : 'bg-white text-gray-400 hover:text-gray-500'
               }`}
           >
             {isInWishlist ? '❤️' : '♡'}
@@ -130,6 +130,11 @@ const ProductCard = ({ product }) => {
           <div className="flex items-center space-x-1 mb-2">
             <span className="text-sm font-bold text-gray-900">{formatPrice(product.price)}</span>
             <span className="text-xs text-gray-500 line-through">{formatPrice(product.originalPrice)}</span>
+
+            {/* Real-time Stock Display */}
+            <span className={`text-xs ml-auto font-medium ${product.stock < 20 ? 'text-red-600' : 'text-green-600'}`}>
+              {product.stock !== undefined ? `${product.stock} left` : ''}
+            </span>
           </div>
 
           {/* <button
