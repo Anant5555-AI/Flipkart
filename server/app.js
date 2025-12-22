@@ -14,7 +14,8 @@ const app = express();
 app.use(cors({
    origin: [
     'http://localhost:5173',  // Local dev
-   'https://flipkart-client-hd9b.onrender.com'
+  //  'https://flipkart-client-hd9b.onrender.com',
+  //  'https://flipkart-client-1.onrender.com'
     // my deployed frontend 
     // URL render pr
   ],

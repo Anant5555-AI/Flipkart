@@ -8,8 +8,14 @@ const orderSchema = new mongoose.Schema({
   },
   items: [{
     product: {
-      type: Object,
+      type: mongoose.Schema.Types.Mixed,
       required: true
+    },
+    name: {
+      type: String
+    },
+    image: {
+      type: String
     },
     quantity: {
       type: Number,
@@ -21,7 +27,7 @@ const orderSchema = new mongoose.Schema({
     }
   }],
   shippingAddress: {
-    type: String,
+    type: mongoose.Schema.Types.Mixed,
     required: true
   },
   status: {

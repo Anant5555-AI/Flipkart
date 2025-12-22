@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import API from '../api/axios';
 import * as yup from 'yup';
 import { FiUser, FiMail, FiLock, FiPhone } from 'react-icons/fi';
 import { useDispatch } from 'react-redux';
@@ -29,22 +30,12 @@ const SignupPage = () => {
         setLoading(true);
         setError('');
         
-        const response = await fetch('http://localhost:5000/api/auth/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify(data),
+        const response = await API.post('/auth/register', {
+          ...data
         });
   
-        const result = await response.json();
+        const result = response.data;
   
-        if (!response.ok) {
-          throw new Error(result.message || 'Registration failed');
-        }
-  
-        // Use loginSuccess action since it has the same signature we need
         dispatch(loginSuccess({
           _id: result.user._id,
           name: result.user.name,
@@ -53,7 +44,6 @@ const SignupPage = () => {
           token: result.token
         }));//here i have updated result.user._id  and all
   
-        // Redirect to home page
         navigate('/');
       } catch (err) {
         setError(err.message || 'Registration failed. Please try again.');
