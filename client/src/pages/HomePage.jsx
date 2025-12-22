@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import ImageCarousel from "../components/ImageCarousel";
 import ProductCard from "../components/ProductCard";
 import ProductSkeleton from "../components/ProductSkeleton";
+import ProductFilters from "../components/ProductFilters";
 import { fetchProducts, fetchCategories, setPage, setLimit } from "../store/slices/productSlice";
 
 const HomePage = () => {
@@ -19,7 +20,10 @@ const HomePage = () => {
     currentPage,
     totalPages,
     totalProducts,
-    limit: itemsPerPage
+    limit: itemsPerPage,
+    minPrice,
+    maxPrice,
+    minRating
   } = useSelector((state) => state.products);
 
   // Fetch products whenever filters or pagination change
@@ -28,9 +32,12 @@ const HomePage = () => {
       page: currentPage,
       limit: itemsPerPage,
       category: selectedCategory,
-      search: searchTerm
+      search: searchTerm,
+      minPrice,
+      maxPrice,
+      minRating
     }));
-  }, [dispatch, currentPage, itemsPerPage, selectedCategory, searchTerm]);
+  }, [dispatch, currentPage, itemsPerPage, selectedCategory, searchTerm, minPrice, maxPrice, minRating]);
 
   // Fetch categories once on mount
   useEffect(() => {
@@ -76,131 +83,142 @@ const HomePage = () => {
       <ImageCarousel />
 
       <main className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-xl font-semibold text-gray-800">
-            {selectedCategory === "All" ? "All Products" : selectedCategory}
-            <span className="text-gray-500 font-normal ml-2">
-              ({totalProducts} items found)
-            </span>
-          </h3>
 
-          {/* ⭐ Items Per Page Selector */}
-          <select
-            value={itemsPerPage}
-            onChange={handleLimitChange}
-            className="border px-3 py-2 rounded text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value={10}>10 per page</option>
-            <option value={20}>20 per page</option>
-            <option value={30}>30 per page</option>
-          </select>
-        </div>
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Sidebar - Filters */}
+          <aside className="w-full lg:w-1/4 shrink-0">
+            <ProductFilters />
+          </aside>
 
-        <AnimatePresence mode="wait">
-          {productsLoading ? (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
-            >
-              {[...Array(itemsPerPage)].map((_, index) => (
-                <div key={`skeleton-${index}`}>
-                  <ProductSkeleton />
-                </div>
-              ))}
-            </motion.div>
-          ) : (
-            <motion.div
-              key="content"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
-            >
-              {products.map((product) => (
+          {/* Main Content - Products */}
+          <div className="flex-1">
+            {/* Header */}
+            <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <h3 className="text-xl font-semibold text-gray-800">
+                {selectedCategory === "All" ? "All Products" : selectedCategory}
+                <span className="text-gray-500 font-normal ml-2">
+                  ({totalProducts} items found)
+                </span>
+              </h3>
+
+              {/* ⭐ Items Per Page Selector */}
+              <select
+                value={itemsPerPage}
+                onChange={handleLimitChange}
+                className="border px-3 py-2 rounded text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value={10}>10 per page</option>
+                <option value={20}>20 per page</option>
+                <option value={30}>30 per page</option>
+              </select>
+            </div>
+
+            <AnimatePresence mode="wait">
+              {productsLoading ? (
                 <motion.div
-                  key={product.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.2 }}
+                  key="loading"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
                 >
-                  <ProductCard product={product} />
+                  {[...Array(itemsPerPage)].map((_, index) => (
+                    <div key={`skeleton-${index}`}>
+                      <ProductSkeleton />
+                    </div>
+                  ))}
                 </motion.div>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
+              ) : (
+                <motion.div
+                  key="content"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
+                >
+                  {products.map((product) => (
+                    <motion.div
+                      key={product.id}
+                      layout
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <ProductCard product={product} />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-        {/* No Results */}
-        {!productsLoading && products.length === 0 && (
-          <div className="text-center py-12">
-            <h3 className="text-xl font-semibold text-gray-700">
-              No products found
-            </h3>
-            <p className="text-gray-500">
-              Try adjusting your search or category filter
-            </p>
-          </div>
-        )}
+            {/* No Results */}
+            {!productsLoading && products.length === 0 && (
+              <div className="text-center py-12">
+                <h3 className="text-xl font-semibold text-gray-700">
+                  No products found
+                </h3>
+                <p className="text-gray-500">
+                  Try adjusting your search or category filter
+                </p>
+              </div>
+            )}
 
-        {/* ⭐ Numbered Pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-2 mt-10">
+            {/* ⭐ Numbered Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-10">
 
-            {/* Prev Button */}
-            <button
-              disabled={currentPage === 1}
-              onClick={() => changePage(currentPage - 1)}
-              className="px-4 py-2 border rounded bg-white hover:bg-gray-100 disabled:bg-gray-200 disabled:text-gray-400 transition-colors"
-            >
-              Prev
-            </button>
+                {/* Prev Button */}
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => changePage(currentPage - 1)}
+                  className="px-4 py-2 border rounded bg-white hover:bg-gray-100 disabled:bg-gray-200 disabled:text-gray-400 transition-colors"
+                >
+                  Prev
+                </button>
 
-            {/* Page Numbers */}
-            {[...Array(totalPages)].map((_, index) => {
-              const pageNum = index + 1;
+                {/* Page Numbers */}
+                {[...Array(totalPages)].map((_, index) => {
+                  const pageNum = index + 1;
 
-              // Simple logic to show a window of pages
-              if (
-                pageNum === 1 ||
-                pageNum === totalPages ||
-                (pageNum >= currentPage - 2 && pageNum <= currentPage + 2)
-              ) {
-                return (
-                  <button
-                    key={index}
-                    onClick={() => changePage(pageNum)}
-                    className={`min-w-[40px] px-3 py-2 border rounded transition-colors ${currentPage === pageNum
-                      ? "bg-blue-600 text-white border-blue-600"
-                      : "bg-white hover:bg-gray-100 text-gray-700"
-                      }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              }
+                  // Simple logic to show a window of pages
+                  if (
+                    pageNum === 1 ||
+                    pageNum === totalPages ||
+                    (pageNum >= currentPage - 2 && pageNum <= currentPage + 2)
+                  ) {
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => changePage(pageNum)}
+                        className={`min-w-[40px] px-3 py-2 border rounded transition-colors ${currentPage === pageNum
+                          ? "bg-blue-600 text-white border-blue-600"
+                          : "bg-white hover:bg-gray-100 text-gray-700"
+                          }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  }
 
-              if (pageNum === currentPage - 3 || pageNum === currentPage + 3) {
-                return <span key={index} className="text-gray-400">...</span>;
-              }
+                  if (pageNum === currentPage - 3 || pageNum === currentPage + 3) {
+                    return <span key={index} className="text-gray-400">...</span>;
+                  }
 
-              return null;
-            })}
+                  return null;
+                })}
 
-            {/* Next Button */}
-            <button
-              disabled={currentPage === totalPages}
-              onClick={() => changePage(currentPage + 1)}
-              className="px-4 py-2 border rounded bg-white hover:bg-gray-100 disabled:bg-gray-200 disabled:text-gray-400 transition-colors"
-            >
-              Next
-            </button>
-          </div>
-        )}
+                {/* Next Button */}
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => changePage(currentPage + 1)}
+                  className="px-4 py-2 border rounded bg-white hover:bg-gray-100 disabled:bg-gray-200 disabled:text-gray-400 transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </div> {/* End of Main Content (flex-1) */}
+        </div> {/* End of Flex Container (Sidebar + Content) */}
       </main>
     </div>
   );
