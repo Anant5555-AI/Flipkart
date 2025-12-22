@@ -142,6 +142,10 @@ const Navbar = () => {
                       <span className="mr-2">📦</span> My Orders
                     </Link>
 
+                    <Link to="/admin" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-sm">
+                      <span className="mr-2">📊</span> Admin Panel
+                    </Link>
+
                     <Link to="/wishlist" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-sm">
                       <span className="mr-2">❤️</span> Wishlist
                     </Link>

@@ -18,6 +18,7 @@ const ProductList = lazy(() => import('./pages/ProductList'));
 const SignupPage = lazy(() => import('./pages/SignupPage'));
 const OrderSuccess = lazy(() => import('./components/OrderSuccess'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 
 function App() {
   const dispatch = useDispatch();
@@ -30,7 +31,7 @@ function App() {
         dispatch(loginFailure('Please log in'));
         return;
       }
-  
+
       try {
         const userData = await getCurrentUser();
         dispatch(loginSuccess({
@@ -45,7 +46,7 @@ function App() {
         }
       }
     };
-  
+
     checkAuth();
   }, [dispatch]);
 
@@ -59,100 +60,108 @@ function App() {
     <Router>
       <div className="flex flex-col min-h-screen bg-gray-50 w-full overflow-x-hidden">
         <Suspense fallback={renderFallback}>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/login" element={
-            <>
-              <Navbar />
-              <LoginPage />
-              <Footer />
-            </>
-          } />
-          
-          <Route path="/signup" element={
-            <>
-              <Navbar />
-              <SignupPage />
-              <Footer />
-            </>
-          } />
-
-          <Route path="/" element={
-            <>
-              <Navbar />
-              <main className="flex-grow">
-                <HomePage />
-              </main>
-              <Footer />
-            </>
-          } />
-
-          <Route path="/products" element={
-            <>
-              <Navbar />
-              <ProductList />
-              <Footer />
-            </>
-          } />
-
-          <Route path="/product/:id" element={
-            <>
-              <Navbar />
-              <ProductPage />
-              <Footer />
-            </>
-          } />
-
-          {/* Protected Routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/cart" element={
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/login" element={
               <>
                 <Navbar />
-                <CartPage />
+                <LoginPage />
                 <Footer />
               </>
             } />
 
-            <Route path="/wishlist" element={
+            <Route path="/signup" element={
               <>
                 <Navbar />
-                <Wishlist />
+                <SignupPage />
                 <Footer />
               </>
             } />
 
-            <Route path="/checkout" element={
+            <Route path="/" element={
               <>
                 <Navbar />
-                <CheckoutPage />
+                <main className="flex-grow">
+                  <HomePage />
+                </main>
                 <Footer />
               </>
             } />
 
-            <Route path="/order/:id" element={
+            <Route path="/products" element={
               <>
                 <Navbar />
-                <OrderSuccess />
+                <ProductList />
                 <Footer />
               </>
             } />
 
-            <Route path="/dashboard" element={
+            <Route path="/product/:id" element={
               <>
                 <Navbar />
-                <DashboardPage />
+                <ProductPage />
                 <Footer />
               </>
             } />
-          </Route>
 
-          {/* 404 Route */}
-          <Route path="*" element={
-            <div className="flex items-center justify-center min-h-screen">
-              <h1 className="text-2xl font-bold">404 - Page Not Found</h1>
-            </div>
-          } />
-        </Routes>
+            {/* Protected Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/cart" element={
+                <>
+                  <Navbar />
+                  <CartPage />
+                  <Footer />
+                </>
+              } />
+
+              <Route path="/wishlist" element={
+                <>
+                  <Navbar />
+                  <Wishlist />
+                  <Footer />
+                </>
+              } />
+
+              <Route path="/checkout" element={
+                <>
+                  <Navbar />
+                  <CheckoutPage />
+                  <Footer />
+                </>
+              } />
+
+              <Route path="/order/:id" element={
+                <>
+                  <Navbar />
+                  <OrderSuccess />
+                  <Footer />
+                </>
+              } />
+
+              <Route path="/dashboard" element={
+                <>
+                  <Navbar />
+                  <DashboardPage />
+                  <Footer />
+                </>
+              } />
+
+              <Route path="/admin" element={
+                <>
+                  <Navbar />
+                  <AdminDashboard />
+                  <Footer />
+                </>
+              } />
+            </Route>
+
+            {/* 404 Route */}
+            <Route path="*" element={
+              <div className="flex items-center justify-center min-h-screen">
+                <h1 className="text-2xl font-bold">404 - Page Not Found</h1>
+              </div>
+            } />
+          </Routes>
         </Suspense>
       </div>
     </Router>
