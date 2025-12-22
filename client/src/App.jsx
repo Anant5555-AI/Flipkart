@@ -29,7 +29,7 @@ function App() {
 
   useEffect(() => {
     // Socket.io Listener for Real-time Stock Updates
-    const socket = io('http://localhost:5000');
+    const socket = io('https://flipkart-1-n14g.onrender.com');
 
     socket.on('connect', () => {
       console.log('Connected to socket server');

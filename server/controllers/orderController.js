@@ -3,6 +3,9 @@ const Product = require('../models/Product');
 const asyncHandler = require('express-async-handler');
 
 const createOrder = asyncHandler(async (req, res) => {
+  console.log('---------------- CREATE ORDER REQUEST RECEIVED ----------------');
+  console.log('Body:', JSON.stringify(req.body, null, 2));
+
   const {
     orderItems,
     shippingAddress,
