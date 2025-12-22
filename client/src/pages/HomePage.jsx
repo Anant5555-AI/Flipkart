@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { motion, AnimatePresence } from "framer-motion";
+import { Toaster } from "react-hot-toast";
 import ImageCarousel from "../components/ImageCarousel";
 import ProductCard from "../components/ProductCard";
+import ProductSkeleton from "../components/ProductSkeleton";
 import { fetchProducts, fetchCategories } from "../store/slices/productSlice";
 
 const HomePage = () => {
@@ -55,57 +58,39 @@ const HomePage = () => {
 
   const changePage = (pageNum) => setCurrentPage(pageNum);
 
-  // Loading View
-  if (productsLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex justify-center items-center py-20">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                Loading Products...
-              </h3>
-              <p className="text-gray-500">
-                Fetching the latest products from our catalog
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // Error View
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center py-20">
-            <div className="text-6xl mb-4">⚠️</div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">
-              Oops! Something went wrong
-            </h3>
-            <p className="text-gray-500 mb-6">{error}</p>
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center"
+        >
+          <div className="text-6xl mb-4">⚠️</div>
+          <h3 className="text-xl font-semibold text-gray-700 mb-2">
+            Oops! Something went wrong
+          </h3>
+          <p className="text-gray-500 mb-6">{error}</p>
 
-            <button
-              onClick={() => {
-                dispatch(fetchProducts());
-                dispatch(fetchCategories());
-              }}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Try Again
-            </button>
-          </div>
-        </div>
+          <button
+            onClick={() => {
+              dispatch(fetchProducts());
+              dispatch(fetchCategories());
+            }}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl"
+          >
+            Try Again
+          </button>
+        </motion.div>
       </div>
     );
   }
 
   // ----------------- Main UI -----------------
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-12">
+      <Toaster position="top-center" reverseOrder={false} />
       <ImageCarousel />
 
       <main className="container mx-auto px-4 py-8">
@@ -130,19 +115,45 @@ const HomePage = () => {
             <option value={10}>10 </option>
             <option value={20}>20 </option>
             <option value={30}>30 </option>
-            
+
           </select>
         </div>
 
         {/* Product Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-          {currentProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          <AnimatePresence mode="wait">
+            {productsLoading ? (
+              // 🔄 Show Skeletons while loading
+              [...Array(12)].map((_, index) => (
+                <motion.div
+                  key={`skeleton-${index}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <ProductSkeleton />
+                </motion.div>
+              ))
+            ) : (
+              // 🛍️ Show Products
+              currentProducts.map((product) => (
+                <motion.div
+                  key={product.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <ProductCard product={product} />
+                </motion.div>
+              ))
+            )}
+          </AnimatePresence>
         </div>
 
         {/* No Results */}
-        {currentProducts.length === 0 && (
+        {!productsLoading && currentProducts.length === 0 && (
           <div className="text-center py-12">
             <h3 className="text-xl font-semibold text-gray-700">
               No products found
@@ -179,11 +190,10 @@ const HomePage = () => {
                   <button
                     key={index}
                     onClick={() => changePage(pageNum)}
-                    className={`px-4 py-2 border rounded ${
-                      currentPage === pageNum
-                        ? "bg-blue-600 text-white"
-                        : "bg-white hover:bg-gray-100"
-                    }`}
+                    className={`px-4 py-2 border rounded ${currentPage === pageNum
+                      ? "bg-blue-600 text-white"
+                      : "bg-white hover:bg-gray-100"
+                      }`}
                   >
                     {pageNum}
                   </button>
