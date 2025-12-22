@@ -7,6 +7,12 @@ const initialState = {
   categories: [],
   selectedCategory: 'All',
   searchTerm: '',
+
+  // Pagination State
+  currentPage: 1,
+  totalPages: 1,
+  totalProducts: 0,
+  limit: 10,
   loading: false,
   productLoading: false,
   categoriesLoading: false,
@@ -14,14 +20,31 @@ const initialState = {
 };
 
 // Fetch ALL products once (Frontend handles pagination)
+// Fetch products with Server-Side Pagination & Filtering
 export const fetchProducts = createAsyncThunk(
   'products/fetchProducts',
-  async (_, { rejectWithValue }) => {
+  async (params = {}, { rejectWithValue, getState }) => {
     try {
-      const response = await API.get('/products');
-      console.log('API Response:', response.data);
-      console.log('Products data:', response.data.data);
-      return response.data.data;
+      const state = getState().products;
+
+      // Use passed params or fallback to current state
+      const page = params.page || state.currentPage || 1;
+      const limit = params.limit || state.limit || 10;
+      const category = params.category !== undefined ? params.category : state.selectedCategory;
+      const search = params.search !== undefined ? params.search : state.searchTerm;
+
+      let queryString = `?page=${page}&limit=${limit}`;
+
+      if (category && category !== 'All') {
+        queryString += `&category=${encodeURIComponent(category)}`;
+      }
+
+      if (search) {
+        queryString += `&search=${encodeURIComponent(search)}`;
+      }
+
+      const response = await API.get(`/products${queryString}`);
+      return response.data; // Return full response { data, total, pagination }
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -60,9 +83,18 @@ const productSlice = createSlice({
   reducers: {
     setSelectedCategory: (state, action) => {
       state.selectedCategory = action.payload;
+      state.currentPage = 1; // Reset to page 1
     },
     setSearchTerm: (state, action) => {
       state.searchTerm = action.payload;
+      state.currentPage = 1; // Reset to page 1
+    },
+    setPage: (state, action) => {
+      state.currentPage = action.payload;
+    },
+    setLimit: (state, action) => {
+      state.limit = action.payload;
+      state.currentPage = 1;
     },
     clearError: (state) => {
       state.error = null;
@@ -78,7 +110,11 @@ const productSlice = createSlice({
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = action.payload;
+        // Backend returns: { success, count, total, pagination: { page, limit, totalPages }, data: [...] }
+        state.products = action.payload.data;
+        state.totalProducts = action.payload.total;
+        state.totalPages = action.payload.pagination.totalPages;
+        state.currentPage = action.payload.pagination.page;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
@@ -117,6 +153,8 @@ const productSlice = createSlice({
 export const {
   setSelectedCategory,
   setSearchTerm,
+  setPage,
+  setLimit,
   clearError
 } = productSlice.actions;
 

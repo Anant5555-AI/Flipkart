@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { Toaster } from "react-hot-toast";
 import ImageCarousel from "../components/ImageCarousel";
 import ProductCard from "../components/ProductCard";
 import ProductSkeleton from "../components/ProductSkeleton";
-import { fetchProducts, fetchCategories } from "../store/slices/productSlice";
+import { fetchProducts, fetchCategories, setPage, setLimit } from "../store/slices/productSlice";
 
 const HomePage = () => {
   const dispatch = useDispatch();
@@ -16,47 +16,29 @@ const HomePage = () => {
     searchTerm,
     loading: productsLoading,
     error,
+    currentPage,
+    totalPages,
+    totalProducts,
+    limit: itemsPerPage
   } = useSelector((state) => state.products);
 
-  // ---------- Frontend Pagination ----------
-  const [currentPage, setCurrentPage] = useState(1);
-
-  // ⭐ Items per page dropdown (10–10 select)
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-
+  // Fetch products whenever filters or pagination change
   useEffect(() => {
-    dispatch(fetchProducts());
+    dispatch(fetchProducts({
+      page: currentPage,
+      limit: itemsPerPage,
+      category: selectedCategory,
+      search: searchTerm
+    }));
+  }, [dispatch, currentPage, itemsPerPage, selectedCategory, searchTerm]);
+
+  // Fetch categories once on mount
+  useEffect(() => {
     dispatch(fetchCategories());
   }, [dispatch]);
 
-  // Reset page when search or category changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, selectedCategory]);
-
-  // ---------- Apply Filtering ----------
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.title
-      ?.toLowerCase()
-      .includes(searchTerm.toLowerCase());
-
-    const matchesCategory =
-      selectedCategory === "All" ||
-      product.category.toLowerCase() === selectedCategory.toLowerCase();
-
-    return matchesSearch && matchesCategory;
-  });
-
-  // ---------- Pagination Logic ----------
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentProducts = filteredProducts.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
-
-  const changePage = (pageNum) => setCurrentPage(pageNum);
+  const changePage = (pageNum) => dispatch(setPage(pageNum));
+  const handleLimitChange = (e) => dispatch(setLimit(Number(e.target.value)));
 
   // Error View
   if (error) {
@@ -75,7 +57,7 @@ const HomePage = () => {
 
           <button
             onClick={() => {
-              dispatch(fetchProducts());
+              dispatch(fetchProducts({ page: 1, limit: itemsPerPage }));
               dispatch(fetchCategories());
             }}
             className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl"
@@ -99,23 +81,19 @@ const HomePage = () => {
           <h3 className="text-xl font-semibold text-gray-800">
             {selectedCategory === "All" ? "All Products" : selectedCategory}
             <span className="text-gray-500 font-normal ml-2">
-              ({startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredProducts.length)} of {filteredProducts.length} items)
+              ({totalProducts} items found)
             </span>
           </h3>
 
           {/* ⭐ Items Per Page Selector */}
           <select
             value={itemsPerPage}
-            onChange={(e) => {
-              setItemsPerPage(Number(e.target.value));
-              setCurrentPage(1); // reset page
-            }}
-            className="border px-3 py-2 rounded text-gray-700"
+            onChange={handleLimitChange}
+            className="border px-3 py-2 rounded text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value={10}>10 </option>
-            <option value={20}>20 </option>
-            <option value={30}>30 </option>
-
+            <option value={10}>10 per page</option>
+            <option value={20}>20 per page</option>
+            <option value={30}>30 per page</option>
           </select>
         </div>
 
@@ -128,7 +106,7 @@ const HomePage = () => {
               exit={{ opacity: 0 }}
               className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
             >
-              {[...Array(12)].map((_, index) => (
+              {[...Array(itemsPerPage)].map((_, index) => (
                 <div key={`skeleton-${index}`}>
                   <ProductSkeleton />
                 </div>
@@ -142,7 +120,7 @@ const HomePage = () => {
               exit={{ opacity: 0 }}
               className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
             >
-              {currentProducts.map((product) => (
+              {products.map((product) => (
                 <motion.div
                   key={product.id}
                   layout
@@ -158,7 +136,7 @@ const HomePage = () => {
         </AnimatePresence>
 
         {/* No Results */}
-        {!productsLoading && currentProducts.length === 0 && (
+        {!productsLoading && products.length === 0 && (
           <div className="text-center py-12">
             <h3 className="text-xl font-semibold text-gray-700">
               No products found
@@ -177,7 +155,7 @@ const HomePage = () => {
             <button
               disabled={currentPage === 1}
               onClick={() => changePage(currentPage - 1)}
-              className="px-4 py-2 border rounded bg-white hover:bg-gray-100 disabled:bg-gray-200"
+              className="px-4 py-2 border rounded bg-white hover:bg-gray-100 disabled:bg-gray-200 disabled:text-gray-400 transition-colors"
             >
               Prev
             </button>
@@ -186,6 +164,7 @@ const HomePage = () => {
             {[...Array(totalPages)].map((_, index) => {
               const pageNum = index + 1;
 
+              // Simple logic to show a window of pages
               if (
                 pageNum === 1 ||
                 pageNum === totalPages ||
@@ -195,9 +174,9 @@ const HomePage = () => {
                   <button
                     key={index}
                     onClick={() => changePage(pageNum)}
-                    className={`px-4 py-2 border rounded ${currentPage === pageNum
-                      ? "bg-blue-600 text-white"
-                      : "bg-white hover:bg-gray-100"
+                    className={`min-w-[40px] px-3 py-2 border rounded transition-colors ${currentPage === pageNum
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "bg-white hover:bg-gray-100 text-gray-700"
                       }`}
                   >
                     {pageNum}
@@ -206,7 +185,7 @@ const HomePage = () => {
               }
 
               if (pageNum === currentPage - 3 || pageNum === currentPage + 3) {
-                return <span key={index}>...</span>;
+                return <span key={index} className="text-gray-400">...</span>;
               }
 
               return null;
@@ -216,7 +195,7 @@ const HomePage = () => {
             <button
               disabled={currentPage === totalPages}
               onClick={() => changePage(currentPage + 1)}
-              className="px-4 py-2 border rounded bg-white hover:bg-gray-100 disabled:bg-gray-200"
+              className="px-4 py-2 border rounded bg-white hover:bg-gray-100 disabled:bg-gray-200 disabled:text-gray-400 transition-colors"
             >
               Next
             </button>
