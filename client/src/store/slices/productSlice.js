@@ -13,6 +13,12 @@ const initialState = {
   totalPages: 1,
   totalProducts: 0,
   limit: 10,
+
+  // Filter State
+  minPrice: '',
+  maxPrice: '',
+  minRating: 0,
+
   loading: false,
   productLoading: false,
   categoriesLoading: false,
@@ -33,6 +39,10 @@ export const fetchProducts = createAsyncThunk(
       const category = params.category !== undefined ? params.category : state.selectedCategory;
       const search = params.search !== undefined ? params.search : state.searchTerm;
 
+      const minPrice = params.minPrice !== undefined ? params.minPrice : (state.minPrice || '');
+      const maxPrice = params.maxPrice !== undefined ? params.maxPrice : (state.maxPrice || '');
+      const minRating = params.minRating !== undefined ? params.minRating : (state.minRating || 0);
+
       let queryString = `?page=${page}&limit=${limit}`;
 
       if (category && category !== 'All') {
@@ -42,6 +52,10 @@ export const fetchProducts = createAsyncThunk(
       if (search) {
         queryString += `&search=${encodeURIComponent(search)}`;
       }
+
+      if (minPrice) queryString += `&minPrice=${minPrice}`;
+      if (maxPrice) queryString += `&maxPrice=${maxPrice}`;
+      if (minRating > 0) queryString += `&minRating=${minRating}`;
 
       const response = await API.get(`/products${queryString}`);
       return response.data; // Return full response { data, total, pagination }
@@ -94,6 +108,23 @@ const productSlice = createSlice({
     },
     setLimit: (state, action) => {
       state.limit = action.payload;
+      state.currentPage = 1;
+    },
+    setPriceRange: (state, action) => {
+      state.minPrice = action.payload.min;
+      state.maxPrice = action.payload.max;
+      state.currentPage = 1;
+    },
+    setMinimumRating: (state, action) => {
+      state.minRating = action.payload;
+      state.currentPage = 1;
+    },
+    clearFilters: (state) => {
+      state.minPrice = '';
+      state.maxPrice = '';
+      state.minRating = 0;
+      state.selectedCategory = 'All';
+      state.searchTerm = '';
       state.currentPage = 1;
     },
     clearError: (state) => {
@@ -155,6 +186,9 @@ export const {
   setSearchTerm,
   setPage,
   setLimit,
+  setPriceRange,
+  setMinimumRating,
+  clearFilters,
   clearError
 } = productSlice.actions;
 

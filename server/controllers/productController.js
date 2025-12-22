@@ -10,6 +10,9 @@ exports.getAllProducts = async (req, res, next) => {
       search,
       sortBy = "createdAt",
       sortOrder = "desc",
+      minPrice,
+      maxPrice,
+      minRating
     } = req.query;
 
     let query = {};
@@ -19,29 +22,52 @@ exports.getAllProducts = async (req, res, next) => {
       query.category = { $regex: category, $options: "i" };
     }
 
-    // Search functionality
+    // ⭐ Advanced Search: Token-based matching
+    // "iphone red" -> matches products containing "iphone" AND "red"
     if (search) {
+      const searchTerms = search.trim().split(/\s+/); // Split by space
+
+      const searchConditions = searchTerms.map(term => ({
+        $or: [
+          { title: { $regex: term, $options: "i" } },
+          { description: { $regex: term, $options: "i" } },
+          { category: { $regex: term, $options: "i" } },
+          { brand: { $regex: term, $options: "i" } },
+        ]
+      }));
+
+      query.$and = searchConditions;
+    }
+
+    // ⭐ Filter by Price Range
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = Number(minPrice);
+      if (maxPrice) query.price.$lte = Number(maxPrice);
+    }
+
+    // ⭐ Filter by Rating
+    if (minRating) {
+      // Handle both numeric rating in DB or object structure if strictly following schema
+      // Since we map it later, we try to match the likely DB field.
+      // Assuming 'rating' or 'rating.rate' exists.
       query.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-        { category: { $regex: search, $options: "i" } },
-        { brand: { $regex: search, $options: "i" } },
+        { rating: { $gte: Number(minRating) } },
+        { "rating.rate": { $gte: Number(minRating) } }
       ];
     }
 
-    // Sorting
+    const total = await Product.countDocuments(query); // Count BEFORE pagination
+
     const sort = {};
     sort[sortBy] = sortOrder === "desc" ? -1 : 1;
 
-    // Pagination
     const skip = (page - 1) * limit;
 
     const products = await Product.find(query)
       .sort(sort)
       .limit(parseInt(limit))
       .skip(skip);
-
-    const total = await Product.countDocuments(query);
 
     // ⭐ Transform DummyJSON-style DB data → Your frontend format
     const transformedProducts = products.map((p) => {
@@ -111,7 +137,7 @@ exports.getProductById = async (req, res, next) => {
 
     // Try to find by ObjectId first, if that fails try by numeric id field
     let product;
-    
+
     // Check if the ID looks like a MongoDB ObjectId
     if (req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
       console.log('ID looks like ObjectId, using findById');
@@ -120,9 +146,9 @@ exports.getProductById = async (req, res, next) => {
       console.log('ID looks like numeric, using findOne by id field');
       // Try to find by numeric id (convert to number) or other id field
       const numericId = parseInt(req.params.id);
-      product = await Product.findOne({ id: numericId }) || 
-                 await Product.findOne({ id: req.params.id }) ||
-                 await Product.findOne({ _id: req.params.id });
+      product = await Product.findOne({ id: numericId }) ||
+        await Product.findOne({ id: req.params.id }) ||
+        await Product.findOne({ _id: req.params.id });
     }
 
     if (!product) {
