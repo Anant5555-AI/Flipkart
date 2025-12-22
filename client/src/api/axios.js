@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const API = axios.create({
-   baseURL: 'http://localhost:5000/api',
-  // baseURL: 'https://flipkart-1-n14g.onrender.com/api',
+  // baseURL: 'http://localhost:5000/api',
+  baseURL: 'https://flipkart-1-n14g.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
