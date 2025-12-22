@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { removeFromCart, clearCart } from '../store/slices/cartSlice';
 import API from '../api/axios'; // Assuming you have an axios instance set up in api.js
 
@@ -38,16 +39,19 @@ const CheckoutPage = () => {
 
   const handlePlaceOrder = async () => {
     if (!user) {
+      toast.error('Please login to place an order');
       navigate('/login');
       return;
     }
 
     if (!deliveryAddress.address || !deliveryAddress.pincode || !deliveryAddress.city || !deliveryAddress.state) {
-      alert('Please fill in all address details');
+      toast.error('Please fill in all address details');
       return;
     }
 
     setIsLoading(true);
+    const loadingToast = toast.loading('Processing your order...');
+
     try {
       const orderData = {
         orderItems: cartItems.map(item => ({
@@ -64,32 +68,31 @@ const CheckoutPage = () => {
         shippingPrice: totalAmount > 0 ? 5 : 0,
         totalPrice: totalAmount + (totalAmount > 0 ? 5 : 0)
       };
-      console.log('Sending order data:', JSON.stringify(orderData, null, 2));
 
       // Make the API call using the axios instance
       const { data } = await API.post('/orders', orderData);
 
-      console.log('Order created successfully:', data);
-
       // Clear cart and redirect to home page
       dispatch(clearCart());
-      alert("order placed succesfully")
+
+      toast.success('Order placed successfully!', {
+        id: loadingToast,
+        duration: 4000,
+        icon: '🎉'
+      });
+
       navigate('/');
 
     } catch (error) {
-      console.error('Order error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
+      console.error('Order error details:', error);
 
       if (error.response?.status === 401) {
-        alert('Your session has expired. Please login again.');
+        toast.error('Session expired. Please login again.', { id: loadingToast });
         localStorage.removeItem('token');
         navigate('/login', { state: { from: '/checkout' } });
       } else {
-        const errorMessage = error.response?.data?.message || 'Failed to place order. Please try again.';
-        alert(errorMessage);
+        const errorMessage = error.response?.data?.message || 'Failed to place order';
+        toast.error(errorMessage, { id: loadingToast });
       }
     } finally {
       setIsLoading(false);
