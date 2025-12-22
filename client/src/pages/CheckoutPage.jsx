@@ -3,12 +3,14 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { removeFromCart, clearCart } from '../store/slices/cartSlice';
-import API from '../api/axios'; // Assuming you have an axios instance set up in api.js
+import API from '../api/axios';
+import PaymentModal from '../components/PaymentModal';
 
 const CheckoutPage = () => {
   const { items: cartItems, totalAmount, totalItems } = useSelector((state) => state.cart);
   const { user, isAuthenticated, token } = useSelector((state) => state.auth);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -37,20 +39,11 @@ const CheckoutPage = () => {
     setDeliveryAddress(prev => ({ ...prev, [name]: value }));
   };
 
-  const handlePlaceOrder = async () => {
-    if (!user) {
-      toast.error('Please login to place an order');
-      navigate('/login');
-      return;
-    }
-
-    if (!deliveryAddress.address || !deliveryAddress.pincode || !deliveryAddress.city || !deliveryAddress.state) {
-      toast.error('Please fill in all address details');
-      return;
-    }
+  const processOrderPlacement = async () => {
+    const finalTotal = totalAmount + (totalAmount > 0 ? 5 : 0);
 
     setIsLoading(true);
-    const loadingToast = toast.loading('Processing your order...');
+    const loadingToast = toast.loading(paymentMethod === 'prepaid' ? 'Verifying payment...' : 'Processing your order...');
 
     try {
       const orderData = {
@@ -66,7 +59,9 @@ const CheckoutPage = () => {
         itemsPrice: Number(totalAmount),
         taxPrice: 0,
         shippingPrice: totalAmount > 0 ? 5 : 0,
-        totalPrice: totalAmount + (totalAmount > 0 ? 5 : 0)
+        totalPrice: finalTotal,
+        isPaid: paymentMethod === 'prepaid',
+        paidAt: paymentMethod === 'prepaid' ? new Date() : null,
       };
 
       // Make the API call using the axios instance
@@ -74,17 +69,18 @@ const CheckoutPage = () => {
 
       // Clear cart and redirect to home page
       dispatch(clearCart());
+      setShowPaymentModal(false);
 
-      toast.success('Order placed successfully!', {
+      toast.success(paymentMethod === 'prepaid' ? 'Payment Successful! Order Placed 🎉' : 'Order placed successfully! 🎉', {
         id: loadingToast,
         duration: 4000,
-        icon: '🎉'
       });
 
       navigate('/');
 
     } catch (error) {
       console.error('Order error details:', error);
+      setShowPaymentModal(false);
 
       if (error.response?.status === 401) {
         toast.error('Session expired. Please login again.', { id: loadingToast });
@@ -99,6 +95,26 @@ const CheckoutPage = () => {
     }
   };
 
+  const handleInitiateOrder = () => {
+    if (!user) {
+      toast.error('Please login to place an order');
+      navigate('/login');
+      return;
+    }
+
+    if (!deliveryAddress.address || !deliveryAddress.pincode || !deliveryAddress.city || !deliveryAddress.state) {
+      toast.error('Please fill in all address details');
+      return;
+    }
+
+    if (paymentMethod === 'prepaid') {
+      setShowPaymentModal(true);
+    } else {
+      processOrderPlacement();
+    }
+  };
+
+  const handlePlaceOrder = handleInitiateOrder;
   const removeItem = (productId) => {
     dispatch(removeFromCart(productId));
   };
@@ -320,6 +336,12 @@ const CheckoutPage = () => {
           </div>
         </div>
       </div>
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onPay={processOrderPlacement}
+        amount={totalAmount + (totalAmount > 0 ? 5 : 0)}
+      />
     </div>
   );
 };
