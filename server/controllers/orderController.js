@@ -1,6 +1,7 @@
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const asyncHandler = require('express-async-handler');
+const mongoose = require('mongoose');
 
 const createOrder = asyncHandler(async (req, res) => {
   console.log('---------------- CREATE ORDER REQUEST RECEIVED ----------------');
@@ -20,7 +21,15 @@ const createOrder = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error('No order items');
   } else {
-    // 1. Create Order
+    // 1. Create Order with Validated Items
+    const validItems = orderItems.filter(item => {
+      // Allow ObjectId or if we change schema later, but for now check validity if we want to query DB
+      if (mongoose.Types.ObjectId.isValid(item.id)) return true;
+      // If it's a legacy number ID like 10, we can accept it for the Order (since schema is Mixed)
+      // BUT we cannot query Product.findById with it directly.
+      return true;
+    });
+
     const order = new Order({
       user: req.user._id,
       items: orderItems.map(item => ({
@@ -41,21 +50,26 @@ const createOrder = asyncHandler(async (req, res) => {
     const createdOrder = await order.save();
 
     // 2. Decrement Stock & Real-time Update
-    // Using for...of loop to handle async/await correctly
     for (const item of orderItems) {
-      const product = await Product.findById(item.id);
-      if (product) {
-        product.stock = Math.max(0, product.stock - item.quantity); // Prevent negative stock
-        await product.save();
+      // Robust check: valid 24-char hex string
+      const isValidObjectId = mongoose.Types.ObjectId.isValid(item.id) && String(item.id).length === 24;
 
-        // 3. Emit Event via Socket.io
-        // req.io is attached in app.js
-        if (req.io) {
-          req.io.emit('product:update', {
-            id: product._id,
-            stock: product.stock
-          });
+      if (isValidObjectId) {
+        const product = await Product.findById(item.id);
+        if (product) {
+          product.stock = Math.max(0, product.stock - item.quantity); // Prevent negative stock
+          await product.save();
+
+          // 3. Emit Event via Socket.io
+          if (req.io) {
+            req.io.emit('product:update', {
+              id: product._id,
+              stock: product.stock
+            });
+          }
         }
+      } else {
+        console.warn(`Skipping stock update for invalid Product ID: ${item.id} (Type: ${typeof item.id})`);
       }
     }
 
